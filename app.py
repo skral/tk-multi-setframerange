@@ -150,6 +150,15 @@ class SetFrameRange(Application):
             current_in = MaxPlus.Animation.GetAnimRange().Start() / ticks
             current_out = MaxPlus.Animation.GetAnimRange().End() / ticks
 
+        elif engine == "tk-syntheyes":
+            from syntheyes import get_existing_connection
+            hlev = get_existing_connection()
+            # Works only for the first camera at the moment
+            cam = hlev.FindObjByName("Camera01")
+            shot = cam.Get("shot")
+            current_in = int(shot.Get("start"))
+            current_out = int(shot.Get("stop"))
+
         else:
             raise tank.TankError("Don't know how to get current frame range for engine %s!" % engine)
 
@@ -221,6 +230,27 @@ class SetFrameRange(Application):
             ticks = MaxPlus.Core.EvalMAXScript("ticksperframe").GetInt()
             range = MaxPlus.Interval(in_frame * ticks, out_frame * ticks)
             MaxPlus.Animation.SetRange(range)
-        
+
+        elif engine == "tk-syntheyes":
+            from syntheyes import get_existing_connection
+            hlev = get_existing_connection()
+            # Works only for the first camera at the moment
+            cam = hlev.FindObjByName("Camera01")
+            shot = cam.Get("shot")
+            current_in = int(shot.Get("start"))
+            current_out = int(shot.Get("stop"))
+            hlev.BeginShotChanges(shot)
+            # TODO: SynthEyes only counts from 0 to the end frame. Mapping the
+            # range from SG to 0 has to be done in here to make this feature
+            # really helpful.
+
+            # Need to do some error handling here because SynthEyes crashes if
+            # we give it values outside the frame range.
+            if current_in <= in_frame < current_out:
+                shot.Set("start", in_frame)
+            if in_frame < out_frame <= current_out:
+                shot.Set("stop", out_frame)
+            hlev.AcceptShotChanges(shot, "Synced Frame Range from SG")
+
         else:
             raise tank.TankError("Don't know how to set current frame range for engine %s!" % engine)
