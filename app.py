@@ -153,8 +153,7 @@ class SetFrameRange(Application):
         elif engine == "tk-syntheyes":
             from syntheyes import get_existing_connection
             hlev = get_existing_connection()
-            # Works only for the first camera at the moment
-            cam = hlev.FindObjByName("Camera01")
+            cam = hlev.Active().cam
             shot = cam.Get("shot")
             current_in = int(shot.Get("start"))
             current_out = int(shot.Get("stop"))
@@ -234,8 +233,7 @@ class SetFrameRange(Application):
         elif engine == "tk-syntheyes":
             from syntheyes import get_existing_connection
             hlev = get_existing_connection()
-            # Works only for the first camera at the moment
-            cam = hlev.FindObjByName("Camera01")
+            cam = hlev.Active().cam
             shot = cam.Get("shot")
             current_in = int(shot.Get("start"))
             current_out = int(shot.Get("stop"))
